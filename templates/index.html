@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول وإضافة وجبة</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts - Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            background-color: #28a745;
+        }
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+        }
+        .card {
+            margin-top: 20px;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-success {
+            background-color: #28a745;
+            border: none;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        .nutrition-info {
+            background-color: #e9f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .nutrition-info p {
+            margin: 0;
+        }
+        .nutrition-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .total-nutrition {
+            background-color: #e9f5e9;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .total-nutrition h5 {
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-container .form-control {
+            margin-bottom: 15px;
+        }
+        .login-container .btn {
+            width: 100%;
+        }
+        .qr-code {
+            width: 150px;
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-utensils"></i> إضافة وجبة
+            </a>
+            <div class="navbar-nav me-auto">
+                <button id="logoutButton" class="btn btn-danger" style="display: none;">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- نموذج تسجيل الدخول -->
+    <div id="loginContainer" class="login-container">
+        <h2>تسجيل الدخول</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">اسم المستخدم</label>
+                <input type="text" id="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password">كلمة المرور</label>
+                <input type="password" id="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success">تسجيل الدخول</button>
+        </form>
+    </div>
+
+    <!-- النموذج -->
+    <div id="mealContainer" class="container" style="display: none;">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-plus-circle"></i> إضافة وجبة جديدة
+                    </div>
+                    <div class="card-body">
+                        <!-- الإجمالي التراكمي -->
+                        <div class="total-nutrition">
+                            <h5>الإجمالي التراكمي:</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p>السعرات الحرارية: <span id="totalCalories">0</span></p>
+                                    <p>البروتين: <span id="totalProtein">0</span> جرام</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p>الدهون: <span id="totalFat">0</span> جرام</p>
+                                    <p>الكربوهيدرات: <span id="totalCarbs">0</span> جرام</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="mealForm">
+                            <!-- اسم الوجبة بالعربية والإنجليزية -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="meal_name_ar" class="form-label">
+                                        <i class="fas fa-edit"></i> اسم الوجبة (عربي)
+                                    </label>
+                                    <input type="text" class="form-control" id="meal_name_ar" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="meal_name_en" class="form-label">
+                                        <i class="fas fa-edit"></i> اسم الوجبة (إنجليزي)
+                                    </label>
+                                    <input type="text" class="form-control" id="meal_name_en" required>
+                                </div>
+                            </div>
+
+                            <!-- تصنيف الوجبة ورفع الصورة -->
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="meal_category" class="form-label">
+                                        <i class="fas fa-tags"></i> تصنيف الوجبة
+                                    </label>
+                                    <select class="form-control" id="meal_category" required>
+                                        <option value="وجبة رئيسية">وجبة رئيسية</option>
+                                        <option value="وجبة خفيفة">وجبة خفيفة</option>
+                                        <option value="حلويات">حلويات</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="meal_image" class="form-label">
+                                        <i class="fas fa-image"></i> صورة الوجبة
+                                    </label>
+                                    <input type="file" class="form-control" id="meal_image" accept="image/*" required>
+                                </div>
+                            </div>
+
+                            <!-- المكونات -->
+                            <div id="ingredients">
+                                <div class="ingredient mb-3">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                <i class="fas fa-carrot"></i> اسم المكون
+                                            </label>
+                                            <input type="text" class="form-control ingredient_name" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                <i class="fas fa-weight-hanging"></i> الكمية (جرام)
+                                            </label>
+                                            <input type="number" class="form-control quantity" required>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-danger btn-sm mt-2 remove_ingredient">
+                                        <i class="fas fa-trash"></i> إزالة
+                                    </button>
+
+                                    <!-- القيم الغذائية -->
+                                    <div class="nutrition-info mt-2">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p>السعرات الحرارية: <span class="calories">-</span></p>
+                                                <p>البروتين: <span class="protein">-</span> جرام</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>الدهون: <span class="fat">-</span> جرام</p>
+                                                <p>الكربوهيدرات: <span class="carbs">-</span> جرام</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- إضافة مكون جديد -->
+                            <button type="button" id="add_ingredient" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> إضافة مكون
+                            </button>
+
+                            <!-- الأزرار -->
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> حفظ الوجبة
+                                </button>
+                                <a href="{{ url_for('meals') }}" class="btn btn-success">
+                                    <i class="fas fa-list"></i> عرض الوجبات المحفوظة
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- عرض رمز QR -->
+    <div id="qrCodeSection" class="text-center mt-4" style="display: none;">
+        <h4>رمز QR للوجبة</h4>
+        <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid qr-code">
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+		    <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+    <script>
+        $(document).ready(function () {
+            // دالة لتحديث الإجمالي التراكمي
+            function updateTotalNutrition() {
+                let totalCalories = 0;
+                let totalProtein = 0;
+                let totalFat = 0;
+                let totalCarbs = 0;
+
+                $('.ingredient').each(function () {
+                    const calories = parseFloat($(this).find('.calories').text()) || 0;
+                    const protein = parseFloat($(this).find('.protein').text()) || 0;
+                    const fat = parseFloat($(this).find('.fat').text()) || 0;
+                    const carbs = parseFloat($(this).find('.carbs').text()) || 0;
+
+                    totalCalories += calories;
+                    totalProtein += protein;
+                    totalFat += fat;
+                    totalCarbs += carbs;
+                });
+
+                $('#totalCalories').text(totalCalories.toFixed(2));
+                $('#totalProtein').text(totalProtein.toFixed(2));
+                $('#totalFat').text(totalFat.toFixed(2));
+                $('#totalCarbs').text(totalCarbs.toFixed(2));
+            }
+
+            // تحديث القيم الغذائية عند تغيير الكمية أو اسم المكون
+            $(document).on('input', '.ingredient_name, .quantity', function () {
+                const ingredientDiv = $(this).closest('.ingredient');
+                const ingredientName = ingredientDiv.find('.ingredient_name').val();
+                const quantity = ingredientDiv.find('.quantity').val();
+
+                if (ingredientName && quantity) {
+                    $.ajax({
+                        url: '/get_nutrition',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            ingredient_name: ingredientName,
+                            quantity: quantity
+                        }),
+                        success: function (response) {
+                            ingredientDiv.find('.calories').text(response.calories.toFixed(2));
+                            ingredientDiv.find('.protein').text(response.protein.toFixed(2));
+                            ingredientDiv.find('.fat').text(response.fat.toFixed(2));
+                            ingredientDiv.find('.carbs').text(response.carbohydrates.toFixed(2));
+                            updateTotalNutrition(); // تحديث الإجمالي التراكمي
+                        }
+                    });
+                }
+            });
+
+            // إضافة مكون جديد
+            $('#add_ingredient').click(function () {
+                const newIngredient = $('.ingredient').first().clone();
+                newIngredient.find('input').val('');
+                newIngredient.find('.nutrition-info span').text('-');
+                $('#ingredients').append(newIngredient);
+                updateTotalNutrition(); // تحديث الإجمالي التراكمي
+            });
+
+            // إزالة مكون
+            $(document).on('click', '.remove_ingredient', function () {
+                if ($('.ingredient').length > 1) {
+                    $(this).closest('.ingredient').remove();
+                    updateTotalNutrition(); // تحديث الإجمالي التراكمي
+                }
+            });
+
+            // حفظ الوجبة
+            $('#mealForm').submit(function (e) {
+                e.preventDefault();
+                const mealNameAr = $('#meal_name_ar').val();
+                const mealNameEn = $('#meal_name_en').val();
+                const mealCategory = $('#meal_category').val();
+                const mealImage = $('#meal_image')[0].files[0];
+                const ingredients = [];
+
+                $('.ingredient').each(function () {
+                    const ingredientName = $(this).find('.ingredient_name').val();
+                    const quantity = $(this).find('.quantity').val();
+                    const calories = $(this).find('.calories').text();
+                    const protein = $(this).find('.protein').text();
+                    const fat = $(this).find('.fat').text();
+                    const carbs = $(this).find('.carbs').text();
+
+                    ingredients.push({
+                        name: ingredientName,
+                        quantity: parseFloat(quantity),
+                        calories: parseFloat(calories),
+                        protein: parseFloat(protein),
+                        fat: parseFloat(fat),
+                        carbohydrates: parseFloat(carbs)
+                    });
+                });
+
+                // هنا يمكنك إضافة الكود لحفظ الوجبة في قاعدة البيانات أو إجراء أي عمل آخر
+                console.log({
+                    mealNameAr,
+                    mealNameEn,
+                    mealCategory,
+                    mealImage,
+                    ingredients
+                });
+            });
+
+            // تسجيل الدخول
+            $('#loginForm').submit(function (e) {
+                e.preventDefault();
+                const username = $('#username').val();
+                const password = $('#password').val();
+
+                // هنا يمكنك إضافة الكود للتحقق من صحة بيانات المستخدم
+                if (username === "admin" && password === "password") {
+                    $('#loginContainer').hide();
+                    $('#mealContainer').show();
+                    $('#logoutButton').show();
+                } else {
+                    alert("اسم المستخدم أو كلمة المرور غير صحيحة");
+                }
+            });
+
+            // تسجيل الخروج
+            $('#logoutButton').click(function () {
+                $('#mealContainer').hide();
+                $('#loginContainer').show();
+                $('#logoutButton').hide();
+            });
+        });
+    </script>
+</body>
+</html>
